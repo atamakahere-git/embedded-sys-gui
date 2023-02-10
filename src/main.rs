@@ -3,17 +3,89 @@
 
 extern crate alloc;
 
+use slint::Model;
+use core::time::Duration;
+use alloc::rc::Rc;
+use alloc::vec::Vec;
+use crate::alloc::string::ToString;
+
 slint::include_modules!();
 
-fn create_slint_app() -> AppWindow {
-    let ui = AppWindow::new();
+struct PrinterQueueData {
+    data: Rc<slint::VecModel<PrinterQueueItem>>,
+    print_progress_timer: slint::Timer,
+}
 
-    let ui_handle = ui.as_weak();
-    ui.on_request_increase_value(move || {
-        let ui = ui_handle.unwrap();
-        ui.set_counter(ui.get_counter() + 1);
+impl PrinterQueueData {
+    fn push_job(&self, title: slint::SharedString) {
+        self.data.push(PrinterQueueItem {
+            status: "WAITING...".into(),
+            progress: 0,
+            title,
+            owner: env!("CARGO_PKG_AUTHORS").into(),
+            pages: 1,
+            size: "100kB".into(),
+            submission_date: current_time(),
+        })
+    }
+}
+
+fn current_time() -> slint::SharedString {
+    #[cfg(not(target_arch = "wasm32"))]
+    return chrono::Local::now().format("%H:%M:%S %d/%m/%Y").to_string().into();
+}
+
+fn create_slint_app() -> MainWindow {
+    let main_window = MainWindow::new();
+    main_window.set_ink_levels(slint::VecModel::from_slice(&[
+        InkLevel { color: slint::Color::from_rgb_u8(0, 255, 255), level: 0.40 },
+        InkLevel { color: slint::Color::from_rgb_u8(255, 0, 255), level: 0.20 },
+        InkLevel { color: slint::Color::from_rgb_u8(255, 255, 0), level: 0.50 },
+        InkLevel { color: slint::Color::from_rgb_u8(0, 0, 0), level: 0.80 },
+    ]));
+    let default_queue: Vec<PrinterQueueItem> =
+        main_window.global::<PrinterQueue>().get_printer_queue().iter().collect();
+    let printer_queue = Rc::new(PrinterQueueData {
+        data: Rc::new(slint::VecModel::from(default_queue)),
+        print_progress_timer: Default::default(),
     });
-    ui
+    main_window.global::<PrinterQueue>().set_printer_queue(printer_queue.data.clone().into());
+
+    let printer_queue_copy = printer_queue.clone();
+    main_window.global::<PrinterQueue>().on_start_job(move |title| {
+        printer_queue_copy.push_job(title);
+    });
+
+    let printer_queue_copy = printer_queue.clone();
+    main_window.global::<PrinterQueue>().on_cancel_job(move |idx| {
+        printer_queue_copy.data.remove(idx as usize);
+    });
+
+    let printer_queue_weak = Rc::downgrade(&printer_queue);
+    printer_queue.print_progress_timer.start(
+        slint::TimerMode::Repeated,
+        Duration::from_secs(1),
+        move || {
+            if let Some(printer_queue) = printer_queue_weak.upgrade() {
+                if printer_queue.data.row_count() > 0 {
+                    let mut top_item = printer_queue.data.row_data(0).unwrap();
+                    top_item.progress += 1;
+                    top_item.status = "PRINTING".into();
+                    if top_item.progress > 100 {
+                        printer_queue.data.remove(0);
+                        if printer_queue.data.row_count() == 0 {
+                            return;
+                        }
+                        top_item = printer_queue.data.row_data(0).unwrap();
+                    }
+                    printer_queue.data.set_row_data(0, top_item);
+                } else {
+                    // FIXME: stop this timer?
+                }
+            }
+        },
+    );
+    main_window
 }
 
 #[cfg(feature = "simulator")]
@@ -159,32 +231,32 @@ fn main() -> ! {
         });
 
         // handle touch event
-        let button = slint::platform::PointerEventButton::Left;
-        if let Some(event) = touch
-            .read()
-            .map_err(|_| ())
-            .unwrap()
-            .map(|point| {
-                let position =
-                    slint::PhysicalPosition::new((point.0 * 320.) as _, (point.1 * 240.) as _)
-                        .to_logical(window.scale_factor());
-                match last_touch.replace(position) {
-                    Some(_) => WindowEvent::PointerMoved { position },
-                    None => WindowEvent::PointerPressed { position, button },
-                }
-            })
-            .or_else(|| {
-                last_touch.take().map(|position| WindowEvent::PointerReleased { position, button })
-            })
-        {
-            window.dispatch_event(event);
-            // Don't go to sleep after a touch event that forces a redraw
-            continue;
-        }
+        // let button = slint::platform::PointerEventButton::Left;
+        // if let Some(event) = touch
+        //     .read()
+        //     .map_err(|_| ())
+        //     .unwrap()
+        //     .map(|point| {
+        //         let position =
+        //             slint::PhysicalPosition::new((point.0 * 320.) as _, (point.1 * 240.) as _)
+        //                 .to_logical(window.scale_factor());
+        //         match last_touch.replace(position) {
+        //             Some(_) => WindowEvent::PointerMoved { position },
+        //             None => WindowEvent::PointerPressed { position, button },
+        //         }
+        //     })
+        //     .or_else(|| {
+        //         last_touch.take().map(|position| WindowEvent::PointerReleased { position, button })
+        //     })
+        // {
+        //     window.dispatch_event(event);
+        //     // Don't go to sleep after a touch event that forces a redraw
+        //     continue;
+        // }
 
-        if window.has_active_animations() {
-            continue;
-        }
+        // if window.has_active_animations() {
+        //     continue;
+        // }
 
         // TODO: we could save battery here by going to sleep up to
         //   slint::platform::duration_until_next_timer_update()

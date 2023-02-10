@@ -22,6 +22,8 @@ display-interface-spi = { version = "0.4.1", optional = true }
 embedded-graphics-core = { version = "0.3.3", optional = true }
 embedded-hal = {version = "0.2.7", optional = true }
 fugit = { version = "0.3.6", optional = true }
+no-std-compat = { version = "0.4.1", features = ["alloc"] }
+chrono = "0.4.23"
 
 [build-dependencies]
 slint-build = { version = "0.3.4" }
@@ -29,21 +31,7 @@ slint-build = { version = "0.3.4" }
 
 [features]
 simulator = ["slint/renderer-winit-software", "slint/backend-winit"]
-pico = [
-    "slint/unsafe-single-threaded",
-    "slint/libm",
-    "rp-pico",
-    "cortex-m",
-    "cortex-m-rt",
-    "alloc-cortex-m",
-    "embedded-hal",
-    "fugit",
-    "st7789",
-    "display-interface-spi",
-    "embedded-graphics-core",
-    "shared-bus",
-    "panic-halt"
-]
+pico = ["slint/unsafe-single-threaded", "slint/libm", "rp-pico", "cortex-m", "cortex-m-rt", "alloc-cortex-m", "embedded-hal", "fugit", "st7789", "display-interface-spi", "embedded-graphics-core", "shared-bus", "panic-halt"]
 
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
