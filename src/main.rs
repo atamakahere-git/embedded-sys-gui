@@ -3,11 +3,11 @@
 
 extern crate alloc;
 
-use slint::Model;
-use core::time::Duration;
+use crate::alloc::string::ToString;
 use alloc::rc::Rc;
 use alloc::vec::Vec;
-use crate::alloc::string::ToString;
+use core::time::Duration;
+use slint::Model;
 
 slint::include_modules!();
 
@@ -31,8 +31,9 @@ impl PrinterQueueData {
 }
 
 fn current_time() -> slint::SharedString {
-    #[cfg(not(target_arch = "wasm32"))]
-    return chrono::Local::now().format("%H:%M:%S %d/%m/%Y").to_string().into();
+    // #[cfg(not(target_arch = "wasm32"))]
+    // return chrono::Local::now().format("%H:%M:%S %d/%m/%Y").to_string().into();
+    "837658734".to_string().into()
 }
 
 fn create_slint_app() -> MainWindow {
@@ -192,7 +193,7 @@ fn main() -> ! {
 
     // -------- Event loop --------
     let mut line = [slint::platform::software_renderer::Rgb565Pixel(0); 320];
-    let mut last_touch = None;
+    // let mut last_touch = None;
     loop {
         slint::platform::update_timers_and_animations();
         window.draw_if_needed(|renderer| {
@@ -229,39 +230,6 @@ fn main() -> ! {
             }
             renderer.render_by_line(DisplayWrapper(&mut display, &mut line));
         });
-
-        // handle touch event
-        // let button = slint::platform::PointerEventButton::Left;
-        // if let Some(event) = touch
-        //     .read()
-        //     .map_err(|_| ())
-        //     .unwrap()
-        //     .map(|point| {
-        //         let position =
-        //             slint::PhysicalPosition::new((point.0 * 320.) as _, (point.1 * 240.) as _)
-        //                 .to_logical(window.scale_factor());
-        //         match last_touch.replace(position) {
-        //             Some(_) => WindowEvent::PointerMoved { position },
-        //             None => WindowEvent::PointerPressed { position, button },
-        //         }
-        //     })
-        //     .or_else(|| {
-        //         last_touch.take().map(|position| WindowEvent::PointerReleased { position, button })
-        //     })
-        // {
-        //     window.dispatch_event(event);
-        //     // Don't go to sleep after a touch event that forces a redraw
-        //     continue;
-        // }
-
-        // if window.has_active_animations() {
-        //     continue;
-        // }
-
-        // TODO: we could save battery here by going to sleep up to
-        //   slint::platform::duration_until_next_timer_update()
-        // or until the next touch interrupt, whatever comes first
-        // cortex_m::asm::wfe();
     }
 }
 
