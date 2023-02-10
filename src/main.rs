@@ -70,7 +70,7 @@ fn create_slint_app() -> MainWindow {
             if let Some(printer_queue) = printer_queue_weak.upgrade() {
                 if printer_queue.data.row_count() > 0 {
                     let mut top_item = printer_queue.data.row_data(0).unwrap();
-                    top_item.progress += 1;
+                    top_item.progress += 2;
                     top_item.status = "PRINTING".into();
                     if top_item.progress > 100 {
                         printer_queue.data.remove(0);

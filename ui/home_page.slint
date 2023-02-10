@@ -45,7 +45,7 @@ export component HomePage inherits Page {
     in-out property <length> header-row-height: 40px / 2;
 
     in-out property <length> button-spacing: 8px;
-    in-out property <length> button-width: 127px / 2;
+    in-out property <length> button-width: 100px / 2;
     in-out property <length> button-height: root.button-width + 20px;
 
     header: "Printer";
@@ -61,7 +61,7 @@ export component HomePage inherits Page {
         x: mod(idx, 1) * (root.button-width + root.button-spacing) + root.button-spacing;
         y: floor(idx / 1) * (root.button-height + root.button-spacing)
            + root.header-row-height
-           + /* top-padding of printer queue */ 18px; // align with the first item of the printer queue
+           + /* top-padding of printer queue */ 15px; // align with the first item of the printer queue
         width: root.button-width;
         height: root.button-height;
         icon: action.icon;

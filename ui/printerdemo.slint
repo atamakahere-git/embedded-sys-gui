@@ -30,8 +30,8 @@ component SideBarIcon inherits Rectangle {
 export component MainWindow inherits Window {
     callback quit();
 
-    width: 772px;
-    height: 504px;
+    width: 320px;
+    height: 240px;
     title: "Slint printer demo";
     background: DemoPalette.main-background;
     default-font-family: "Noto Sans";
@@ -50,11 +50,11 @@ export component MainWindow inherits Window {
 
     HorizontalLayout {
         padding: 10px;
-        padding-left: 67px;
+        padding-left: 37px;
 
         main-view := Rectangle {
             height: 100%;
-            border-radius: 30px;
+            border-radius: 20px;
             background: DemoPalette.page-background-color;
 
             Rectangle {
@@ -83,12 +83,12 @@ export component MainWindow inherits Window {
     }
 
     sidebar := Rectangle {
-        width: 57px;
-        x: 10px;
+        width: 7px;
+        x: 5px;
 
         function icon-y(index: int) -> length {
-            return 100px // top padding
-                + index * 72px;
+            return 40px // top padding
+                + index * 38px;
         }
 
         Image {
@@ -109,9 +109,9 @@ export component MainWindow inherits Window {
             @image-url("images/ink.svg"),
         ] : SideBarIcon {
             y: sidebar.icon-y(idx);
-            x: 16px;
-            height: 35px;
-            width: 30px;
+            x: 6px;
+            height: 20px;
+            width: 20px;
 
             icon := Image {
                 colorize: (root.active-page == idx) ? DemoPalette.active-page-icon-color : DemoPalette.inactive-page-icon-color;
@@ -130,18 +130,18 @@ export component MainWindow inherits Window {
         }
 
         Rectangle {
-            y: sidebar.icon-y(3) + 17px;
-            x: 12px;
+            y: sidebar.icon-y(3);
+            x: 5px;
             background: #6284FF;
             height: 2px;
-            width: 37px;
+            width: 20px;
         }
 
         SideBarIcon {
-            y: sidebar.icon-y(4);
-            x: 16px;
-            height: 35px;
-            width: 30px;
+            y: sidebar.icon-y(4) - 10px;
+            x: 6px;
+            height: 20px;
+            width: 20px;
 
             Image {
                 colorize: DemoPalette.night-mode ? #F1FF98 : DemoPalette.inactive-page-icon-color;

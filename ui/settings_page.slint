@@ -7,7 +7,7 @@ export component SettingsPage inherits Page {
     header: "Settings";
 
     GridLayout {
-        padding-top: 23px /* header line height in design */
+        padding-top: 13px /* header line height in design */
                      + /* extra top-padding in design */ 13px;
         spacing: 5px;
         Row {
@@ -71,8 +71,8 @@ export component SettingsPage inherits Page {
     }
     Image {
         source: DemoPalette.night-mode ? @image-url("slint-logo-square-dark-80x80.png") : @image-url("slint-logo-square-light-80x80.png");
-        width: 80px;
-        height: 80px;
+        width: 50px;
+        height: 50px;
         x: parent.width - self.width;
         y: parent.height - self.height;
     }
