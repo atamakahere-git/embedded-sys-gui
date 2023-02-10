@@ -103,7 +103,6 @@ fn main() -> ! {
     use rp_pico::hal;
     use rp_pico::hal::pac;
     use rp_pico::hal::prelude::*;
-    use slint::platform::WindowEvent;
 
     // -------- Setup Allocator --------
     const HEAP_SIZE: usize = 200 * 1024;
@@ -160,10 +159,10 @@ fn main() -> ! {
     display.set_orientation(st7789::Orientation::Landscape).unwrap();
 
     // touch screen
-    let touch_irq = pins.gpio17.into_pull_up_input();
-    let mut touch =
-        xpt2046::XPT2046::new(touch_irq, pins.gpio16.into_push_pull_output(), spi.acquire_spi())
-            .unwrap();
+    // let touch_irq = pins.gpio17.into_pull_up_input();
+    // let mut touch =
+    //     xpt2046::XPT2046::new(touch_irq, pins.gpio16.into_push_pull_output(), spi.acquire_spi())
+    //         .unwrap();
 
     // -------- Setup the Slint backend --------
     let window = slint::platform::software_renderer::MinimalSoftwareWindow::new();
@@ -234,6 +233,7 @@ fn main() -> ! {
 }
 
 #[cfg(not(feature = "simulator"))]
+#[allow(dead_code)]
 mod xpt2046 {
     use embedded_hal::blocking::spi::Transfer;
     use embedded_hal::digital::v2::{InputPin, OutputPin};
@@ -342,6 +342,7 @@ mod xpt2046 {
         InternalError,
     }
 
+    #[allow(dead_code)]
     unsafe fn set_spi_freq(freq: impl Into<fugit::Hertz<u32>>) {
         use rp_pico::hal;
         // FIXME: the touchscreen and the LCD have different frequencies, but we cannot really set different frequencies to different SpiProxy without this hack
